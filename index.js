@@ -4,7 +4,7 @@ const colors = require('colors');
 
 const tty = process.platform === 'win32' ? 'CON' : '/dev/tty';
 
-const getCommits = (projectDir, limit = 4) =>
+const getCommits = (projectDir, limit) =>
   new Promise((resolve, reject) => {
     exec(
       `git shortlog -sne --no-merges < ${tty}`,
@@ -65,7 +65,7 @@ const getStatisticByUser = (projectDir, email) =>
   });
 
 const run = async () => {
-  const [projectDir, limit] = process.argv.slice(2);
+  const [projectDir, limit = '4'] = process.argv.slice(2);
   console.log(
     `Top ${limit.bold.blue} contributors of the project: ${
       path.basename(path.resolve(projectDir)).bold.blue
