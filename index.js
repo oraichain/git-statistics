@@ -6,7 +6,7 @@ const tty = process.platform === 'win32' ? 'CON' : '/dev/tty';
 const getCommits = (projectDir, limit = 4) =>
   new Promise((resolve, reject) => {
     exec(
-      `git shortlog -sn --no-merges < ${tty}`,
+      `git shortlog -sne --no-merges < ${tty}`,
       { cwd: projectDir },
       (err, stdout) => {
         if (err) return reject(err);
@@ -20,13 +20,10 @@ const getCommits = (projectDir, limit = 4) =>
     );
   });
 
-const getStatisticByUser = (projectDir, user) =>
+const getStatisticByUser = (projectDir, email) =>
   new Promise((resolve, reject) => {
     exec(
-      `git log --no-merges --shortstat --author="${user.replace(
-        /\\/g,
-        '\\\\\\'
-      )}"  < ${tty} | grep -E "fil(e|es) changed"`,
+      `git log --no-merges --shortstat --author="${email}"  < ${tty} | grep -E "fil(e|es) changed"`,
       { cwd: projectDir },
       (err, stdout) => {
         if (err) return reject(err);
@@ -52,13 +49,15 @@ const getStatisticByUser = (projectDir, user) =>
         stat.lines = stat.lineAdded - stat.lineDeleted;
         stat.ratio = ((100 * stat.lineDeleted) / stat.lineAdded).toPrecision(4);
 
-        const finalRet = `\t- Files changed (total)..  ${
+        const finalRet = `    - Files changed (total)..      ${
           stat.files.toString().bold.blue
         }
-\t- Lines added (total)....  ${stat.lineAdded.toString().bold.green}
-\t- Lines deleted (total)..  ${stat.lineDeleted.toString().bold.red}
-\t- Total lines (delta)....  ${stat.lines.toString().bold.yellow}
-\t- Del./Add. ratio (percent)..  ${(stat.ratio.toString() + '%').bold.yellow}`;
+    - Lines added (total)....      ${stat.lineAdded.toString().bold.green}
+    - Lines deleted (total)..      ${stat.lineDeleted.toString().bold.red}
+    - Total lines (delta)....      ${stat.lines.toString().bold.yellow}
+    - Del./Add. ratio (percent)..  ${
+      (stat.ratio.toString() + '%').bold.yellow
+    }`;
         resolve(finalRet);
       }
     );
@@ -70,14 +69,19 @@ const run = async () => {
     `Top ${limit.bold.blue} contributors of the project: ${projectDir.bold.blue}`
   );
   const commits = await getCommits(projectDir, limit);
-  for (const [commitNum, user] of commits) {
+  for (const [commitNum, info] of commits) {
+    const [user, email] = info.match(/(.*)\s+<(.*?)>/).slice(1);
     console.log(
-      `\nUser ${user.green} made ${commitNum.yellow} commit${
-        commitNum > 1 ? 's' : ''
-      }`
+      `\nUser ${user.bold.green}(${email.bold.blue}) made ${
+        commitNum.yellow
+      } commit${commitNum > 1 ? 's' : ''}`
     );
-    const statistics = await getStatisticByUser(projectDir, user);
-    console.log(statistics);
+    try {
+      const statistics = await getStatisticByUser(projectDir, email);
+      console.log(statistics);
+    } catch (ex) {
+      console.log(ex.message);
+    }
   }
 };
 
