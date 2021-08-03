@@ -1,4 +1,5 @@
 const { exec } = require('child_process');
+const path = require('path');
 const colors = require('colors');
 
 const tty = process.platform === 'win32' ? 'CON' : '/dev/tty';
@@ -66,15 +67,17 @@ const getStatisticByUser = (projectDir, email) =>
 const run = async () => {
   const [projectDir, limit] = process.argv.slice(2);
   console.log(
-    `Top ${limit.bold.blue} contributors of the project: ${projectDir.bold.blue}`
+    `Top ${limit.bold.blue} contributors of the project: ${
+      path.basename(path.resolve(projectDir)).bold.blue
+    }`
   );
   const commits = await getCommits(projectDir, limit);
   for (const [commitNum, info] of commits) {
     const [user, email] = info.match(/(.*)\s+<(.*?)>/).slice(1);
     console.log(
-      `\nUser ${user.bold.green}(${email.bold.blue}) made ${
-        commitNum.yellow
-      } commit${commitNum > 1 ? 's' : ''}`
+      `\n${user.bold.green}(${email.bold.blue}): ${commitNum.yellow} commit${
+        commitNum > 1 ? 's' : ''
+      }`
     );
     try {
       const statistics = await getStatisticByUser(projectDir, email);
