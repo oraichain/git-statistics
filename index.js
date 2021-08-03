@@ -48,7 +48,7 @@ const getStatisticByUser = (projectDir, email) =>
           }
         }
         stat.lines = stat.lineAdded - stat.lineDeleted;
-        stat.ratio = ((100 * stat.lineDeleted) / stat.lineAdded).toPrecision(4);
+        stat.ratio = ((100 * stat.lineDeleted) / stat.lineAdded).toFixed(2);
 
         const finalRet = `    - Files changed (total)..      ${
           stat.files.toString().bold.blue
