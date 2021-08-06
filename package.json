@@ -4,6 +4,6 @@
     "start": "node index.js"
   },
   "dependencies": {
-    "colors": "^1.4.0"
+    "console-table-printer": "^2.10.0"
   }
 }
