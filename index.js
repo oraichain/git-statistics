@@ -36,9 +36,9 @@ const getStatisticByUser = (projectDir, email) =>
         const stat = {
           files: 0,
           added: 0,
-          deleted: 0,
-          lines: 0,
-          ratio: ''
+          deleted: 0
+          // lines: 0,
+          // ratio: ''
         };
         for (const row of result) {
           stat.files += +row[0];
@@ -47,10 +47,10 @@ const getStatisticByUser = (projectDir, email) =>
             stat.deleted += +row[5];
           }
         }
-        stat.lines = stat.added - stat.deleted;
-        stat.ratio = ((100 * stat.deleted) / stat.added)
-          .toFixed(2)
-          .replace(/\.?0+$/, '');
+        // stat.lines = stat.added - stat.deleted;
+        // stat.ratio = ((100 * stat.deleted) / stat.added)
+        //   .toFixed(2)
+        //   .replace(/\.?0+$/, '');
         resolve(stat);
       }
     );
@@ -60,13 +60,13 @@ const run = async () => {
   const p = new Table({
     columns: [
       { name: 'user', title: 'User', color: 'magenta' },
-      { name: 'email', title: 'Email', color: 'blue' },
+      { name: 'email', title: 'Email', color: 'yellow' },
       { name: 'commit', title: 'Commit', color: 'cyan' },
-      { name: 'files', title: 'Files changed', color: 'crimson' },
-      { name: 'added', title: 'Lines added', color: 'green' },
-      { name: 'deleted', title: 'Lines deleted', color: 'red' },
-      { name: 'lines', title: 'Total lines', color: 'yellow' },
-      { name: 'ratio', title: 'Del./Add.', color: 'white' }
+      { name: 'files', title: 'Files', color: 'crimson' },
+      { name: 'added', title: 'Lines +', color: 'green' },
+      { name: 'deleted', title: 'Lines -', color: 'red' }
+      // { name: 'lines', title: 'Total lines', color: 'yellow' },
+      // { name: 'ratio', title: 'Del./Add.', color: 'white' }
     ]
   });
   const [projectDir, limit = '4'] = process.argv.slice(2);
