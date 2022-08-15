@@ -57,36 +57,43 @@ const getStatisticByUser = (projectDir, email) =>
   });
 
 const run = async () => {
-  const p = new Table({
-    columns: [
-      { name: 'user', title: 'User', color: 'magenta' },
-      { name: 'email', title: 'Email', color: 'yellow' },
-      { name: 'commit', title: 'Commit', color: 'cyan' },
-      { name: 'files', title: 'Files', color: 'crimson' },
-      { name: 'added', title: 'Lines +', color: 'green' },
-      { name: 'deleted', title: 'Lines -', color: 'red' }
-      // { name: 'lines', title: 'Total lines', color: 'yellow' },
-      // { name: 'ratio', title: 'Del./Add.', color: 'white' }
-    ]
-  });
-  const [projectDir, limit = '4'] = process.argv.slice(2);
-  console.log(
-    `Top ${limit} contributors of the project: ${path.basename(
-      path.resolve(projectDir)
-    )}`
-  );
-  const commits = await getCommits(projectDir, limit);
-  for (const [commit, info] of commits) {
-    const [user, email] = info.match(/(.*)\s+<(.*?)>/).slice(1);
-    try {
-      const stat = await getStatisticByUser(projectDir, email);
-      Object.assign(stat, { user, email, commit });
-      p.addRow(stat);
-    } catch (ex) {
-      console.log(ex.message);
-    }
+  const projectDirs = process.argv.slice(2);
+  const limitIndex = projectDirs.indexOf('--limit');
+  let limit = 4;
+  if (limitIndex !== -1) {
+    limit = projectDirs.splice(limitIndex, 2)[1];
   }
-  p.printTable();
+  for (const projectDir of projectDirs) {
+    console.log(
+      `Top ${limit} contributors of the project: ${path.basename(
+        path.resolve(projectDir)
+      )}`
+    );
+    const p = new Table({
+      columns: [
+        { name: 'user', title: 'User', color: 'magenta' },
+        { name: 'email', title: 'Email', color: 'yellow' },
+        { name: 'commit', title: 'Commit', color: 'cyan' },
+        { name: 'files', title: 'Files', color: 'crimson' },
+        { name: 'added', title: 'Lines +', color: 'green' },
+        { name: 'deleted', title: 'Lines -', color: 'red' }
+        // { name: 'lines', title: 'Total lines', color: 'yellow' },
+        // { name: 'ratio', title: 'Del./Add.', color: 'white' }
+      ]
+    });
+    const commits = await getCommits(projectDir, limit);
+    for (const [commit, info] of commits) {
+      const [user, email] = info.match(/(.*)\s+<(.*?)>/).slice(1);
+      try {
+        const stat = await getStatisticByUser(projectDir, email);
+        Object.assign(stat, { user, email, commit });
+        p.addRow(stat);
+      } catch (ex) {
+        console.log(ex.message);
+      }
+    }
+    p.printTable();
+  }
 };
 
 run();

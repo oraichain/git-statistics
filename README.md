@@ -1,3 +1,3 @@
 # How to start
 
-`yarn start ~/Projects/oraichain/orai 4`
+`yarn start ~/Projects/oraichain/orai [paths] --limit 4`
